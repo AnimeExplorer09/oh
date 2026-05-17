@@ -18,26 +18,22 @@ class ChatRequest(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"message": "Python Backend is ready!"}
+    return {"message": "Python Backend Spy Mode Active!"}
 
 @app.post("/api/chat")
 def chat_with_ai(request: ChatRequest):
-    # Anthropic Messages format endpoint use kar rahe hain
-    agent_router_url = "https://agentrouter.org/v1/messages"
+    # Base URL ko test karne ke liye
+    agent_router_url = "https://agentrouter.org/v1/chat/completions"
     api_key = "Sk-7eeoGOHiiviyMTB6Rxe87lOnB7rGgto8FR8JKmDztKpmriZX"
 
-    # Anthropic standard payload structure
     payload = {
         "model": "claude-3-5-sonnet",
-        "max_tokens": 1024,
-        "messages": [
-            {"role": "user", "content": request.prompt}
-        ]
+        "messages": [{"role": "user", "content": request.prompt}],
+        "stream": False
     }
 
     headers = {
-        "x-api-key": api_key,          # Anthropic API Key header
-        "anthropic-version": "2023-06-01", # Required for Anthropic style proxies
+        "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
         "Accept": "application/json"
     }
@@ -45,12 +41,21 @@ def chat_with_ai(request: ChatRequest):
     try:
         response = requests.post(agent_router_url, json=payload, headers=headers)
         
-        # Agar fir bhi HTML mile, toh error details return karein taaki debug ho sake
+        # AGAR HTML AAYA: Toh crash mat karo, balki us HTML ka text content nikal kar return karo!
         if "application/json" not in response.headers.get("Content-Type", ""):
-            raise HTTPException(
-                status_code=502, 
-                detail=f"Status {response.status_code}. Agent Router HTML return kar raha hai."
-            )
+            raw_html = response.text
+            # Agar unhone response me kuch text likha hai, toh use extract karo
+            import re
+            clean_text = re.sub('<[^<]+?>', '', raw_html).strip() # Saari HTML tags gayab
+            clean_text = " ".join(clean_text.split())[:300] # Pehle 300 words check karne ke liye
+            
+            return {
+                "choices": [{
+                    "message": {
+                        "content": f"⚠️ Server returned HTML text: {clean_text}"
+                    }
+                }]
+            }
 
         return response.json()
 
