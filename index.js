@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
 });
 
 // Aapka sahi API URL aur API Key direct code me
-const AGENT_ROUTER_BASE_URL = "https://agentrouter.org/v1/chat/completions";
+const AGENT_ROUTER_BASE_URL = "https://agentrouter.org/";
 const MY_SECRET_API_KEY = "Sk-7eeoGOHiiviyMTB6Rxe87lOnB7rGgto8FR8JKmDztKpmriZX"; 
 
 app.post('/api/chat', async (req, res) => {
