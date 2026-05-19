@@ -46,3 +46,4 @@ def chat_with_ai(request: ChatRequest):
 
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=500, detail=str(e))
+
