@@ -18,7 +18,7 @@ class ChatRequest(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"message": "Agent Router Termux-Style Backend is Live!"}
+    return {"message": "24/7 Anti-Block Agent Router Backend is Live!"}
 
 @app.post("/api/chat")
 def chat_with_ai(request: ChatRequest):
@@ -31,34 +31,37 @@ def chat_with_ai(request: ChatRequest):
         "stream": False
     }
 
-    # Termux aur Android browser ka exact fingerprint mimic karne ke liye headers
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36",
-        "Accept": "application/json, text/plain, */*",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Sec-Ch-Ua": '"Not-A.Brand";v="99", "Chromium";v="124"',
-        "Sec-Ch-Ua-Mobile": "?1",
-        "Sec-Ch-Ua-Platform": '"Android"',
-        "Sec-Fetch-Dest": "empty",
-        "Sec-Fetch-Mode": "cors",
-        "Sec-Fetch-Site": "cross-site"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    }
+
+    # Free public proxy to mask Render's data-center IP
+    # Yeh request ko ek normal internet user ki tarah bhejega
+    proxies = {
+        "http": "http://pubproxy.com/api/proxy",
+        "https": "http://pubproxy.com/api/proxy"
     }
 
     try:
-        # Ek fresh session banakar call karenge taaki cookie block na ho
-        session = requests.Session()
-        response = session.post(agent_router_url, json=payload, headers=headers, timeout=20)
-        
-        # Check agar fir bhi HTML de raha hai
-        if "application/json" not in response.headers.get("Content-Type", ""):
-            raise HTTPException(
-                status_code=502, 
-                detail="Cloudflare ne Render IP ko fir se catch kar liya. Aap ek baar frontend refresh karke bhejiyega."
-            )
+        # Pehle proxy ke sath try karenge, agar proxy slow ho toh bina proxy ke backup check lagaya hai
+        try:
+            response = requests.post(agent_router_url, json=payload, headers=headers, proxies=proxies, timeout=15)
+        except Exception:
+            # Backup: Ek aur free proxy alternative anoymous route
+            alt_proxy = {"https": "http://185.193.157.43:8080"} 
+            response = requests.post(agent_router_url, json=payload, headers=headers, proxies=alt_proxy, timeout=15)
 
-        return response.json()
+        # Agar JSON response mil gaya, toh Cloudflare bypass ho gaya!
+        if "application/json" in response.headers.get("Content-Type", ""):
+            return response.json()
+            
+        # Fallback handling agar fir bhi HTML page pakda de
+        raise HTTPException(
+            status_code=502, 
+            detail="Firewall block bypass temporary issue. Ek baar fir se send button dabayein."
+        )
 
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=500, detail=str(e))
