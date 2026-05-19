@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
 
+# Vercel ke liye app instance
 app = FastAPI()
 
 app.add_middleware(
@@ -16,6 +17,7 @@ app.add_middleware(
 class ChatRequest(BaseModel):
     prompt: str
 
+# Base route jo vercel check karega
 @app.get("/api/main")
 def read_root():
     return {"message": "Python Backend for Agent Router on Vercel is Live 24/7!"}
@@ -46,4 +48,3 @@ def chat_with_ai(request: ChatRequest):
 
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=500, detail=str(e))
-
