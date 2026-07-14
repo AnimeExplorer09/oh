@@ -1,125 +1,2509 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal AI Chat</title>
+    <title>Yuffie - Kinetic Interface v4</title>
+
+    <!-- SEO -->
+    <meta name="description" content="Full-stack developer portfolio — anime-inspired kinetic interface, projects, and contact.">
+    <meta name="theme-color" content="#060608">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="YOUR NAME — Developer Portfolio">
+    <meta property="og:description" content="Full-Stack Developer · Anime Enthusiast. Check out my projects and get in touch.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://u.cubeupload.com/zmonochrome/tumblr8b1866a9355004.jpg">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="YOUR NAME — Developer Portfolio">
+    <meta name="twitter:description" content="Full-Stack Developer · Anime Enthusiast.">
+    <meta name="twitter:image" content="https://u.cubeupload.com/zmonochrome/tumblr8b1866a9355004.jpg">
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;900&family=Syncopate:wght@700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            background-color: #131314; 
-            color: #e3e3e3; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex; flex-direction: column; height: 100vh;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        header {
-            padding: 20px; text-align: center; border-bottom: 1px solid #2d2f31;
-            background-color: #1e1f20;
+
+        :root {
+            --bg-main: #060608;
+            --bg-radial: #2b0404;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --card-bg: rgba(255, 255, 255, 0.02);
         }
-        header h1 { font-size: 1.5rem; color: #fff; font-weight: 500; }
-        #chatContainer {
-            flex: 1; overflow-y: auto; padding: 20px;
-            display: flex; flex-direction: column; gap: 15px;
+
+        body.light-theme {
+            --bg-main: #f2ece2;
+            --bg-radial: #e3c9a0;
+            --text-primary: #241a12;
+            --text-secondary: #6b5744;
+            --card-bg: rgba(0, 0, 0, 0.03);
         }
-        .message { max-width: 80%; padding: 12px 16px; border-radius: 12px; line-height: 1.5; }
-        .user { background-color: #2b2a33; align-self: flex-end; color: #fff; }
-        .ai { background-color: #1e1f20; align-self: flex-start; border: 1px solid #2d2f31; }
-        #inputContainer {
-            padding: 20px; display: flex; gap: 10px; background-color: #131314;
-            border-top: 1px solid #2d2f31;
+
+        html, body {
+            background: var(--bg-main);
+            background-image: radial-gradient(circle at center, var(--bg-radial) 0%, var(--bg-main) 100%);
+            font-family: 'Noto Sans JP', 'Syncopate', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background 0.4s ease;
         }
-        input {
-            flex: 1; padding: 14px; border-radius: 24px; border: 1px solid #4d4d4d;
-            background-color: #1e1f20; color: #fff; font-size: 1rem; outline: none;
+
+        body{
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            padding: 0;
         }
-        input:focus { border-color: #a8c7fa; }
-        button {
-            padding: 0 24px; border-radius: 24px; border: none;
-            background-color: #a8c7fa; color: #041e49; font-weight: bold;
-            font-size: 1rem; cursor: pointer; transition: background 0.2s;
+
+        #petals-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 999;
+            pointer-events: none;
+            will-change: transform;
         }
-        button:hover { background-color: #c2e7ff; }
-        button:disabled { background-color: #4d4d4d; color: #808080; cursor: not-allowed; }
+
+        .canvas-container {
+            width: 95vw;
+            height: 53.43vw; 
+            max-width: 1200px;
+            max-height: 675px;
+            display: grid;
+            grid-template-columns: 45% 42% 13%;
+            background-image: url('https://u.cubeupload.com/zmonochrome/tumblr8b1866a9355004.jpg');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            
+            box-shadow: 
+                0 30px 100px rgba(0, 0, 0, 0.8),
+                inset 0 0 80px rgba(6, 6, 8, 0.9),
+                inset 0 0 140px rgba(0, 0, 0, 0.95);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .canvas-container::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 40%, rgba(6, 6, 8, 0.85) 100%);
+            z-index: 12;
+            pointer-events: none;
+        }
+
+        .canvas-dot-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.04) 15%, transparent 16%);
+            background-size: 6px 6px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .ui-corner-bracket {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            z-index: 13;
+            pointer-events: none;
+        }
+        .top-left { top: 25px; left: 25px; border-right: none; border-bottom: none; }
+        .bottom-right { bottom: 25px; right: 25px; border-left: none; border-top: none; }
+
+        .nihility-bg-text {
+            position: absolute;
+            width: 200%;
+            top: 45%;
+            left: 0;
+            transform: translateY(-50%);
+            font-family: 'Syncopate', sans-serif;
+            font-size: 14rem;
+            font-weight: 700;
+            color: rgba(181, 137, 61, 0.03);
+            letter-spacing: 30px;
+            white-space: nowrap;
+            z-index: 1;
+            pointer-events: none;
+            user-select: none;
+            animation: move-nihility 35s linear infinite;
+        }
+
+        .left-panel {
+            padding: 5% 7%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            z-index: 5;
+            background: linear-gradient(90deg, rgba(6, 6, 8, 0.98) 0%, rgba(70, 3, 3, 0.65) 75%, rgba(0, 0, 0, 0) 100%);
+        }
+
+        .hero-quote-header {
+            font-size: 0.75rem;
+            font-weight: 900;
+            color: #cbd5e1;
+            letter-spacing: 2px;
+            line-height: 1.5;
+            text-transform: uppercase;
+            border-left: 3px solid #b5893d;
+            padding-left: 10px;
+        }
+
+        .quote-jp {
+            font-size: 0.65rem;
+            color: #8492a6;
+            display: block;
+            margin-top: 4px;
+            letter-spacing: 1px;
+        }
+
+        .main-title-group {
+            position: relative;
+            margin-top: 15px;
+        }
+
+        .main-kanji {
+            font-size: 9.5rem;
+            font-weight: 900;
+            color: #ffffff;
+            line-height: 0.85;
+            letter-spacing: -6px;
+            display: inline-block;
+            text-shadow: 
+                1px 1px 0px #b5893d,
+                2px 2px 0px #8a6428,
+                3px 3px 0px #5e4319,
+                5px 5px 25px rgba(0, 0, 0, 0.95);
+        }
+
+        .japanese-sub {
+            font-size: 0.95rem;
+            color: #f1f5f9;
+            font-weight: 900;
+            letter-spacing: 6px;
+            margin-bottom: 8px;
+            display: block;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+        }
+
+        .numeric-badge {
+            display: inline-block;
+            background-color: #ffffff;
+            color: #000000;
+            padding: 4px 16px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            letter-spacing: 3px;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            border-radius: 2px;
+        }
+
+        .control-bridge {
+            width: 95vw;
+            max-width: 1200px;
+            display: flex;
+            justify-content: center;
+            margin: 24px 0;
+        }
+
+        .music-player {
+            background: rgba(40, 15, 15, 0.25);
+            border: 1px solid rgba(181, 137, 61, 0.3);
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            backdrop-filter: blur(20px) saturate(150%);
+            -webkit-backdrop-filter: blur(20px) saturate(150%);
+            border-radius: 8px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            transition: border-color 0.3s ease;
+            width: 100%;
+            max-width: 320px;
+        }
+        
+        .music-player.is-playing {
+            border-color: rgba(181, 137, 61, 0.4);
+        }
+
+        .player-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .track-title {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 60%;
+        }
+
+        .time-display {
+            font-size: 0.55rem;
+            font-family: monospace;
+            color: #94a3b8;
+            font-weight: bold;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            position: relative;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #b5893d, #ffffff);
+            position: absolute;
+            top: 0; left: 0;
+            border-radius: 2px;
+            box-shadow: 0 0 8px #b5893d;
+        }
+
+        .player-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            padding: 2px 4px;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            color: #b5893d;
+        }
+
+        .play-btn {
+            background: transparent;
+            border: 1px solid rgba(181, 137, 61, 0.5);
+            color: #ffffff;
+            padding: 4px 14px;
+            font-size: 0.55rem;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            border-radius: 20px;
+            transition: all 0.25s ease;
+        }
+
+        .play-btn:hover {
+            background: #b5893d;
+            color: #060608;
+            transform: scale(1.03);
+        }
+
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .volume-label {
+            font-size: 0.55rem;
+            color: #475569;
+            font-family: monospace;
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 70px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.12);
+            outline: none;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 8px;
+            height: 8px;
+            background: #b5893d;
+            border-radius: 50%;
+        }
+
+        /* --- SAKURA INTENSITY CONTROL --- */
+        .sakura-control {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(181, 137, 61, 0.2);
+            padding-top: 8px;
+        }
+
+        .sakura-label {
+            font-size: 0.55rem;
+            color: #475569;
+            font-family: monospace;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .sakura-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 90px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.12);
+            outline: none;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        .sakura-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+        }
+
+        .left-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 15px;
+        }
+
+        .game-meta {
+            font-size: 0.65rem;
+            color: #475569;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .tag-pill {
+            background-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: #ffffff;
+            padding: 4px 14px;
+            font-size: 0.6rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            border-radius: 2px;
+        }
+
+        .center-panel {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 4;
+        }
+
+        .art-window {
+            width: 92%;
+            height: 90%;
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+            background: linear-gradient(135deg, rgba(20, 30, 30, 0.05) 0%, rgba(10, 15, 15, 0.3) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .large-bg-kanji {
+            font-size: 16rem;
+            color: rgba(255, 255, 255, 0.02);
+            position: absolute;
+            top: -20px; left: -20px;
+            font-weight: 900;
+            z-index: 2;
+            user-select: none;
+        }
+
+        .tech-overlay {
+            position: absolute;
+            right: 25px; top: 25%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.55rem;
+            font-family: monospace;
+            z-index: 3;
+        }
+
+        .live-pulse-bar {
+            width: 40px;
+            height: 2px;
+            background-color: #b5893d;
+            animation: bar-stretch 1.2s infinite ease-in-out;
+        }
+
+        .character-root {
+            position: absolute;
+            width: 140%; height: 115%;
+            bottom: 2%; left: -20%;
+            z-index: 10;
+            pointer-events: none;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); 
+            will-change: transform;
+        }
+
+        .character-img {
+            width: 100%; height: 100%;
+            object-fit: contain;
+            object-position: bottom center;
+            filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 60px rgba(220, 38, 38, 0.12)); 
+            animation: float-character 6s ease-in-out infinite;
+        }
+
+        .right-panel {
+            background: transparent;
+            padding: 40px 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            color: #ffffff;
+            position: relative;
+            z-index: 15;
+            background: linear-gradient(-90deg, rgba(6, 6, 8, 0.4) 0%, transparent 100%);
+        }
+
+        .pill-box {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 4px 18px;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            font-weight: bold;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .vertical-text-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .v-kanji-title {
+            writing-mode: vertical-rl;
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: 10px;
+            color: #ffffff;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.6);
+        }
+
+        .v-latin-sub {
+            writing-mode: vertical-rl;
+            font-size: 0.7rem;
+            letter-spacing: 6px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .diamond {
+            color: #b5893d;
+            font-size: 0.7rem;
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+
+        .panel-footer-stamp {
+            text-align: center;
+        }
+
+        .micro-japanese {
+            font-size: 0.45rem;
+            letter-spacing: 3px;
+            color: rgba(255, 255, 255, 0.3);
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            margin-top: 8px;
+        }
+
+        .portfolio-mini {
+            width: 95vw;
+            max-width: 1200px;
+            margin: 50px 0 60px;
+            text-align: center;
+            position: relative;
+            padding: 60px 7%;
+        }
+
+        .portfolio-mini::before{
+            content: '創';
+            position: absolute;
+            font-size: 14rem;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.02);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .profile-avatar {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(181, 137, 61, 0.5);
+            box-shadow: 0 0 20px rgba(181, 137, 61, 0.25);
+            margin: 0 auto 16px;
+            display: block;
+        }
+
+        .mini-eyebrow {
+            font-size: 0.65rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            color: rgba(181, 137, 61, 0.8);
+            text-transform: uppercase;
+        }
+
+        .mini-name {
+            font-family: 'Syncopate', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.6rem, 4vw, 2.6rem);
+            color: var(--text-primary);
+            margin-top: 12px;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 0px #b5893d, 3px 3px 20px rgba(0,0,0,0.9);
+        }
+
+        .mini-role {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            letter-spacing: 1px;
+        }
+
+        .mini-role .sep {
+            color: #b5893d;
+            margin: 0 8px;
+        }
+
+        .mini-links {
+            margin-top: 24px;
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .mini-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            color: rgba(255,255,255,0.6);
+            border: 1px solid rgba(255,255,255,0.15);
+            text-decoration: none;
+            transition: color 0.25s ease, border-color 0.25s ease, transform 0.25s ease, background 0.25s ease;
+            position: relative;
+        }
+
+        .mini-links a .icon {
+            width: 16px;
+            height: 16px;
+            vertical-align: 0;
+        }
+
+        .mini-links a:hover {
+            color: #b5893d;
+            border-color: #b5893d;
+            background: rgba(181, 137, 61, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .copy-toast {
+            position: absolute;
+            top: -28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(4px);
+            background: #b5893d;
+            color: #060608;
+            font-size: 0.6rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            padding: 3px 10px;
+            border-radius: 4px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .copy-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .mini-skills {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .skill-tag {
+            font-family: monospace;
+            font-size: 0.6rem;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(181, 137, 61, 0.35);
+            background: rgba(181, 137, 61, 0.06);
+            padding: 5px 14px;
+            border-radius: 20px;
+            transition: all 0.25s ease;
+            cursor: default;
+        }
+
+        .skill-tag:hover {
+            background: rgba(181, 137, 61, 0.25);
+            color: #ffffff;
+            border-color: #b5893d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(181, 137, 61, 0.25);
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.7s cubic-bezier(0.25, 1, 0.5, 1), transform 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .mini-about {
+            max-width: 480px;
+            margin: 20px auto 0;
+            font-size: 0.8rem;
+            line-height: 1.6;
+            color: #94a3b8;
+        }
+
+        .stats-row {
+            margin-top: 36px;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 0 12px rgba(181, 137, 61, 0.4);
+        }
+
+        .stat-label {
+            margin-top: 4px;
+            font-size: 0.6rem;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+        }
+
+        .projects-grid {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            text-align: left;
+        }
+
+        .project-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(181, 137, 61, 0.2);
+            border-radius: 8px;
+            padding: 18px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #b5893d, transparent);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .project-card:hover {
+            border-color: rgba(181, 137, 61, 0.5);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .project-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .project-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+        .project-desc {
+            margin-top: 8px;
+            font-size: 0.7rem;
+            line-height: 1.5;
+            color: #94a3b8;
+        }
+
+        .project-tag {
+            display: inline-block;
+            margin-top: 12px;
+            font-family: monospace;
+            font-size: 0.55rem;
+            color: #b5893d;
+            letter-spacing: 1px;
+        }
+
+        /* --- NOW BUILDING BADGE --- */
+        .now-building {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 14px;
+            padding: 6px 16px;
+            border: 1px solid rgba(181, 137, 61, 0.4);
+            border-radius: 20px;
+            background: rgba(181, 137, 61, 0.06);
+            font-family: monospace;
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 8px #4ade80;
+            animation: pulse-glow 1.5s infinite ease-in-out;
+        }
+
+        /* --- SKILL PROGRESS BARS --- */
+        .skill-bars {
+            max-width: 380px;
+            margin: 32px auto 0;
+            text-align: left;
+        }
+
+        .skill-bar-row {
+            margin-bottom: 14px;
+        }
+
+        .skill-bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            font-family: monospace;
+            margin-bottom: 5px;
+        }
+
+        .skill-bar-track {
+            height: 5px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .skill-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #b5893d, #ef4444);
+            border-radius: 3px;
+            transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* --- ACHIEVEMENTS/BADGES --- */
+        .badges-grid {
+            margin-top: 36px;
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .badge-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            width: 90px;
+        }
+
+        .badge-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: 1px solid rgba(181, 137, 61, 0.4);
+            background: rgba(181, 137, 61, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .badge-item:hover .badge-icon {
+            transform: scale(1.1) rotate(-6deg);
+            box-shadow: 0 0 16px rgba(181, 137, 61, 0.4);
+        }
+
+        .badge-label {
+            font-size: 0.55rem;
+            text-align: center;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+
+        /* --- DEVLOG --- */
+        .devlog {
+            max-width: 420px;
+            margin: 40px auto 0;
+            text-align: left;
+        }
+
+        .devlog-entry {
+            display: flex;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .devlog-date {
+            font-family: monospace;
+            font-size: 0.6rem;
+            color: #b5893d;
+            white-space: nowrap;
+            padding-top: 2px;
+        }
+
+        .devlog-text {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* --- TESTIMONIALS CAROUSEL --- */
+        .testimonial-wrap {
+            max-width: 420px;
+            margin: 40px auto 0;
+            position: relative;
+            min-height: 90px;
+        }
+
+        .testimonial {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            pointer-events: none;
+        }
+
+        .testimonial.active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .testimonial-quote {
+            font-size: 0.75rem;
+            font-style: italic;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .testimonial-author {
+            margin-top: 8px;
+            font-size: 0.6rem;
+            color: #b5893d;
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+
+        .testimonial-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 16px;
+        }
+
+        .testimonial-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .testimonial-dot.active {
+            background: #b5893d;
+        }
+
+        /* --- GITHUB STATS CARD --- */
+        .github-card {
+            max-width: 420px;
+            margin: 40px auto 0;
+            border: 1px solid rgba(181, 137, 61, 0.25);
+            border-radius: 8px;
+            padding: 18px;
+            background: var(--card-bg);
+        }
+
+        .github-card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.7rem;
+            color: var(--text-primary);
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .github-stats-row {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 14px;
+        }
+
+        .github-stat {
+            text-align: center;
+        }
+
+        .github-stat-num {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: #b5893d;
+        }
+
+        .github-stat-label {
+            font-size: 0.55rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* --- CONTACT FORM --- */
+        .contact-form {
+            max-width: 380px;
+            margin: 40px auto 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            background: var(--card-bg);
+            border: 1px solid rgba(181, 137, 61, 0.25);
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 0.75rem;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.25s ease;
+        }
+
+        .contact-form input:focus,
+        .contact-form textarea:focus {
+            border-color: #b5893d;
+        }
+
+        .contact-form textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .contact-submit {
+            align-self: center;
+            margin-top: 4px;
+            background: transparent;
+            border: 1px solid #b5893d;
+            color: #b5893d;
+            padding: 8px 24px;
+            font-size: 0.65rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .contact-submit:hover {
+            background: #b5893d;
+            color: #060608;
+        }
+
+        /* --- ACTION BUTTONS ROW --- */
+        .action-buttons {
+            margin-top: 36px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+            padding: 7px 16px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+
+        .action-btn:hover {
+            border-color: #b5893d;
+            color: #b5893d;
+        }
+
+        .icon {
+            width: 14px;
+            height: 14px;
+            vertical-align: -2px;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        .icon-sm {
+            width: 11px;
+            height: 11px;
+            vertical-align: -1px;
+        }
+
+        /* --- LOADING SCREEN --- */
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            background: #060608;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .loading-kanji {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #b5893d;
+            letter-spacing: 4px;
+            animation: pulse-glow 1.2s infinite ease-in-out;
+        }
+
+        .loading-text {
+            font-family: monospace;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 2px;
+        }
+
+        /* --- SCROLL PROGRESS BAR --- */
+        .scroll-progress {
+            position: fixed;
+            top: 0; left: 0;
+            height: 3px;
+            width: 0%;
+            background: linear-gradient(90deg, #b5893d, #ef4444);
+            z-index: 9998;
+            box-shadow: 0 0 8px rgba(181, 137, 61, 0.6);
+            transition: width 0.1s linear;
+        }
+
+        /* --- TYPING ANIMATION --- */
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            background: #b5893d;
+            margin-left: 2px;
+            animation: blink-cursor 0.8s step-end infinite;
+        }
+
+        @keyframes blink-cursor {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* --- MUSIC VISUALIZER --- */
+        .visualizer-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 14px;
+        }
+
+        .visualizer-bars span {
+            width: 3px;
+            background: #b5893d;
+            border-radius: 1px;
+            height: 4px;
+            animation: none;
+        }
+
+        .music-player.is-playing .visualizer-bars span {
+            animation: viz-bounce 0.9s ease-in-out infinite;
+        }
+
+        .music-player.is-playing .visualizer-bars span:nth-child(1) { animation-delay: 0s; }
+        .music-player.is-playing .visualizer-bars span:nth-child(2) { animation-delay: 0.15s; }
+        .music-player.is-playing .visualizer-bars span:nth-child(3) { animation-delay: 0.3s; }
+        .music-player.is-playing .visualizer-bars span:nth-child(4) { animation-delay: 0.45s; }
+
+        @keyframes viz-bounce {
+            0%, 100% { height: 4px; }
+            50% { height: 14px; }
+        }
+
+        /* --- SKILL RADAR CHART --- */
+        .radar-wrap {
+            margin: 32px auto 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* --- PROJECT MODAL --- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: #0d0508;
+            border: 1px solid rgba(181, 137, 61, 0.4);
+            border-radius: 10px;
+            padding: 24px;
+            max-width: 360px;
+            width: 100%;
+            text-align: left;
+            transform: translateY(16px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-image {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 14px;
+            border: 1px solid rgba(181, 137, 61, 0.25);
+        }
+
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: #ffffff;
+        }
+
+        .modal-desc {
+            margin-top: 10px;
+            font-size: 0.75rem;
+            line-height: 1.6;
+            color: #94a3b8;
+        }
+
+        .modal-tags {
+            margin-top: 14px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .modal-close {
+            margin-top: 18px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #ffffff;
+            padding: 6px 18px;
+            font-size: 0.6rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-radius: 16px;
+            cursor: pointer;
+        }
+
+        /* --- QR CODE --- */
+        .qr-box {
+            margin: 40px auto 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .qr-box img {
+            width: 100px;
+            height: 100px;
+            border-radius: 6px;
+            border: 1px solid rgba(181, 137, 61, 0.3);
+            background: #fff;
+            padding: 6px;
+        }
+
+        .qr-label {
+            font-size: 0.55rem;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+        }
+
+        /* --- VISITOR COUNTER --- */
+        .visitor-counter {
+            margin-top: 14px;
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            font-family: monospace;
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes move-nihility {
+            0% { transform: translate(0, -50%); }
+            100% { transform: translate(-50%, -50%); } 
+        }
+
+        @keyframes float-character {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes bar-stretch {
+            0%, 100% { width: 15px; }
+            50% { width: 45px; }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.3; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+
+        @media (max-width: 820px){
+            .portfolio-mini{ padding: 40px 5%; }
+        }
     </style>
+    <!-- Firebase SDK (compat, for simple script-tag use without a bundler) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
-    <header>
-        <h1>Claude AI Chat (Python Backend)</h1>
-    </header>
-
-    <div id="chatContainer">
-        <div class="message ai">Hello! Python backend setup complete ho gaya hai. Kuch bhi pooch kar test kijiye!</div>
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-kanji">朝日</div>
+        <div class="loading-text">初期化中... LOADING</div>
     </div>
 
-    <div id="inputContainer">
-        <input type="text" id="userInput" placeholder="Ask something..." onkeypress="handleKeyPress(event)">
-        <button id="sendBtn" onclick="askAI()">Send</button>
+    <div class="scroll-progress" id="scroll-progress"></div>
+
+    <canvas id="petals-canvas"></canvas>
+
+    <div class="canvas-container" id="main-canvas">
+        
+        <div class="canvas-dot-overlay"></div>
+        <div class="ui-corner-bracket top-left"></div>
+        <div class="ui-corner-bracket bottom-right"></div>
+        
+        <div class="nihility-bg-text">NIHILITY NIHILITY NIHILITY</div>
+        
+        <section class="left-panel">
+            <div class="hero-quote-header">
+                Fret not! The hero Chixia has arrived!
+                <span class="quote-jp">心配ご無用！正義 de 味方、熾霞のお出ましだ！</span>
+            </div>
+
+            <div class="main-title-group">
+                <span class="japanese-sub">ブレイジング・ブライト</span>
+                <h1 class="main-kanji">朝日</h1>
+                <br>
+                <div class="numeric-badge">1542991141</div>
+            </div>
+
+            <div class="left-footer">
+                <p class="game-meta">OVERDRIVE MODE // FREQUENCY: STABLE</p>
+                <div class="tag-pill">BOOM BOOM!</div>
+            </div>
+        </section>
+
+        <section class="center-panel">
+            <div class="art-window">
+                <span class="large-bg-kanji">古</span>
+                <div class="tech-overlay">
+                    <span>STATUS: ACTIVE</span>
+                    <span>GLASS: JINSHI_DARK</span>
+                    <div class="live-pulse-bar"></div>
+                </div>
+            </div>
+            <div class="character-root" id="character-layer">
+                <img src="" alt="Render" class="character-img" id="character-img">
+            </div>
+        </section>
+
+        <aside class="right-panel">
+            <div class="pill-box">YUFFIE</div>
+            <div class="vertical-text-wrap">
+                <span class="v-kanji-title">朝日</span>
+                <span class="v-latin-sub">ASAHI</span>
+                <span class="diamond">✦</span>
+                <span class="v-latin-sub">CREATIVE</span>
+            </div>
+            <div class="panel-footer-stamp">
+                <div style="color: rgba(255,255,255,0.2); font-size: 10px;">—</div>
+                <p class="micro-japanese">システム起動完了</p>
+            </div>
+        </aside>
+
     </div>
+
+    <div class="control-bridge">
+        <div class="music-player" id="player-card">
+            <audio id="audio-element" src="https://www.dropbox.com/scl/fi/ersb17v6uwmcelmvapgxp/Fall-To-Hell-DOLLWAVE-Darkwave-Lyrics-visualizer.mp3?rlkey=3pfivpdswvsnwxwzqnix01wnl&st=vs1tmdms&dl=1"></audio>
+            
+            <div class="player-info">
+                <span class="track-title" id="track-name">Fall To Hell - DOLLWAVE</span>
+                <span class="time-display" id="time-track">0:00 / 0:00</span>
+            </div>
+            
+            <div class="progress-container" id="progress-cont">
+                <div class="progress-bar" id="progress-actual"></div>
+            </div>
+            
+            <div class="player-controls">
+                <button class="nav-btn" id="prev-track" aria-label="Previous track">
+                    <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+                </button>
+                <button class="play-btn" id="play-trigger">Play</button>
+                <button class="nav-btn" id="next-track" aria-label="Next track">
+                    <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+                </button>
+                <div class="visualizer-bars">
+                    <span></span><span></span><span></span><span></span>
+                </div>
+                <div class="volume-container">
+                    <span class="volume-label">VOL</span>
+                    <input type="range" class="volume-slider" id="vol-slider" min="0" max="1" step="0.05" value="0.5">
+                </div>
+            </div>
+
+            <div class="sakura-control">
+                <span class="sakura-label"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2a3 3 0 0 1 3 3 3 3 0 0 1-3 3 3 3 0 0 1-3-3 3 3 0 0 1 3-3ZM12 22a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3ZM2 12a3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3 3 3 0 0 1-3-3ZM22 12a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3Z"/></svg> SAKURA</span>
+                <input type="range" class="sakura-slider" id="sakura-slider" min="10" max="150" step="5" value="40">
+            </div>
+        </div>
+    </div>
+
+    <section class="portfolio-mini">
+        <img class="profile-avatar reveal" id="profile-avatar" src="" alt="" style="display:none;">
+        <div class="mini-eyebrow reveal" data-en="Developer Profile" data-jp="開発者プロフィール">Developer Profile</div>
+        <h2 class="mini-name reveal">YOUR NAME</h2>
+        <p class="mini-role reveal">Full-Stack Developer <span class="sep">✦</span> <span id="typing-target"></span><span class="typing-cursor" id="typing-cursor">&nbsp;</span></p>
+
+        <div class="now-building reveal">
+            <span class="pulse-dot"></span>
+            Now Building: AniCompanion — Phase 3
+        </div>
+
+        <p class="mini-about reveal">Building kinetic interfaces and anime-inspired apps, one late-night commit at a time. Passionate about clean UI, smooth animation, and bringing character to code.</p>
+
+        <div class="mini-skills reveal">
+            <span class="skill-tag">Flutter</span>
+            <span class="skill-tag">Python</span>
+            <span class="skill-tag">Firebase</span>
+            <span class="skill-tag">Gemini API</span>
+            <span class="skill-tag">React</span>
+        </div>
+
+        <div class="skill-bars reveal">
+            <div class="skill-bar-row">
+                <div class="skill-bar-label"><span>Flutter</span><span>90%</span></div>
+                <div class="skill-bar-track"><div class="skill-bar-fill" data-width="90"></div></div>
+            </div>
+            <div class="skill-bar-row">
+                <div class="skill-bar-label"><span>Python</span><span>85%</span></div>
+                <div class="skill-bar-track"><div class="skill-bar-fill" data-width="85"></div></div>
+            </div>
+            <div class="skill-bar-row">
+                <div class="skill-bar-label"><span>Firebase</span><span>80%</span></div>
+                <div class="skill-bar-track"><div class="skill-bar-fill" data-width="80"></div></div>
+            </div>
+            <div class="skill-bar-row">
+                <div class="skill-bar-label"><span>UI / Animation</span><span>88%</span></div>
+                <div class="skill-bar-track"><div class="skill-bar-fill" data-width="88"></div></div>
+            </div>
+        </div>
+
+        <div class="radar-wrap reveal">
+            <canvas id="radar-chart" width="220" height="220"></canvas>
+        </div>
+
+        <div class="stats-row reveal">
+            <div class="stat-item">
+                <div class="stat-number" data-count="12">0</div>
+                <div class="stat-label">Projects</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" data-count="3">0</div>
+                <div class="stat-label">Years</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" data-count="100">0</div>
+                <div class="stat-label">% Passion</div>
+            </div>
+        </div>
+
+        <div class="visitor-counter reveal" id="visitor-counter"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg> Loading visitors...</div>
+
+        <div class="badges-grid reveal">
+            <div class="badge-item">
+                <div class="badge-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M5 4H3v2a4 4 0 0 0 4 4M19 4h2v2a4 4 0 0 1-4 4"/></svg></div>
+                <div class="badge-label">50+ Commits</div>
+            </div>
+            <div class="badge-item">
+                <div class="badge-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2a3 3 0 0 1 3 3 3 3 0 0 1-3 3 3 3 0 0 1-3-3 3 3 0 0 1 3-3ZM12 22a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3ZM2 12a3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3 3 3 0 0 1-3-3ZM22 12a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3Z"/></svg></div>
+                <div class="badge-label">Anime Nerd</div>
+            </div>
+            <div class="badge-item">
+                <div class="badge-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg></div>
+                <div class="badge-label">Night Coder</div>
+            </div>
+            <div class="badge-item">
+                <div class="badge-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg></div>
+                <div class="badge-label">Fast Shipper</div>
+            </div>
+        </div>
+
+        <div class="projects-grid reveal">
+            <div class="project-card" data-modal="anicompanion">
+                <div class="project-title">AniCompanion</div>
+                <div class="project-desc">Anime companion Android app powered by the Gemini API, built with Flutter.</div>
+                <span class="project-tag">FLUTTER · GEMINI API</span>
+            </div>
+            <div class="project-card" data-modal="animeexplorer">
+                <div class="project-title">AnimeExplorer</div>
+                <div class="project-desc">Gacha card vault web app using the Jikan API and Firebase Firestore.</div>
+                <span class="project-tag">FIREBASE · JIKAN API</span>
+            </div>
+            <div class="project-card" data-modal="jarvis">
+                <div class="project-title">Jarvis Assistant</div>
+                <div class="project-desc">Python-based AI assistant for Termux, powered by Groq and Cohere.</div>
+                <span class="project-tag">PYTHON · GROQ</span>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="modal-overlay">
+            <div class="modal-content">
+                <img class="modal-image" id="modal-image" src="" alt="" style="display:none;">
+                <div class="modal-title" id="modal-title"></div>
+                <div class="modal-desc" id="modal-desc"></div>
+                <div class="modal-tags" id="modal-tags"></div>
+                <button class="modal-close" id="modal-close">Close</button>
+            </div>
+        </div>
+
+        <div class="devlog reveal">
+            <div class="devlog-entry">
+                <span class="devlog-date">JUL 12</span>
+                <span class="devlog-text">Added sakura intensity slider + glass control panel to Yuffie interface.</span>
+            </div>
+            <div class="devlog-entry">
+                <span class="devlog-date">JUL 08</span>
+                <span class="devlog-text">Wrapped up AniCompanion Phase 2 — Alya's chat memory now persists.</span>
+            </div>
+            <div class="devlog-entry">
+                <span class="devlog-date">JUL 02</span>
+                <span class="devlog-text">Shipped 5-card pack reveals with animated epic borders on AnimeExplorer.</span>
+            </div>
+        </div>
+
+        <div class="testimonial-wrap reveal">
+            <div class="testimonial active">
+                <p class="testimonial-quote">"Somehow every UI they touch ends up feeling alive."</p>
+                <p class="testimonial-author">— A fellow dev</p>
+            </div>
+            <div class="testimonial">
+                <p class="testimonial-quote">"Ships fast, sweats the small animation details more than anyone."</p>
+                <p class="testimonial-author">— Project collaborator</p>
+            </div>
+            <div class="testimonial">
+                <p class="testimonial-quote">"Turned a simple portfolio into something you actually want to scroll through."</p>
+                <p class="testimonial-author">— A visitor</p>
+            </div>
+            <div class="testimonial-dots">
+                <span class="testimonial-dot active" data-index="0"></span>
+                <span class="testimonial-dot" data-index="1"></span>
+                <span class="testimonial-dot" data-index="2"></span>
+            </div>
+        </div>
+
+        <div class="github-card reveal">
+            <div class="github-card-header"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg> GitHub Activity</div>
+            <div class="github-stats-row">
+                <div class="github-stat">
+                    <div class="github-stat-num">340+</div>
+                    <div class="github-stat-label">Commits</div>
+                </div>
+                <div class="github-stat">
+                    <div class="github-stat-num">18</div>
+                    <div class="github-stat-label">Repos</div>
+                </div>
+                <div class="github-stat">
+                    <div class="github-stat-num">27</div>
+                    <div class="github-stat-label">Day Streak</div>
+                </div>
+            </div>
+        </div>
+
+        <form class="contact-form reveal" id="contact-form">
+            <input type="text" placeholder="Your Name" required>
+            <input type="email" placeholder="Your Email" required>
+            <textarea placeholder="Message" required></textarea>
+            <input type="text" name="website" id="hp-field" autocomplete="off" tabindex="-1" style="position:absolute; left:-9999px; opacity:0; height:0; width:0;" aria-hidden="true">
+            <button type="submit" class="contact-submit">Send Message</button>
+        </form>
+
+        <div class="qr-box reveal">
+            <img id="qr-code" src="" alt="QR Code">
+            <span class="qr-label">SCAN TO VISIT</span>
+        </div>
+
+        <div class="action-buttons reveal">
+            <button class="action-btn" id="resume-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Resume</button>
+            <button class="action-btn" id="share-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Share</button>
+            <button class="action-btn" id="theme-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 18a6 6 0 0 0 0-12v12z" fill="currentColor"/></svg> Theme</button>
+            <button class="action-btn" id="lang-btn">文 EN/JP</button>
+        </div>
+
+        <div class="mini-links reveal">
+            <a href="mailto:you@example.com" id="email-link" aria-label="Email" title="Email">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>
+                <span class="copy-toast" id="copy-toast">Copied!</span>
+            </a>
+            <a href="#" id="github-link" aria-label="GitHub" title="GitHub">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+            </a>
+            <a href="#" id="twitter-link" aria-label="Twitter / X" title="Twitter / X">
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.9 2H22l-7.6 8.7L23.3 22h-7.2l-5.6-7.3L4 22H1l8.1-9.3L0.8 2H8.2l5.1 6.7L18.9 2Zm-1.2 18h2L6.4 4H4.3l13.4 16Z"/></svg>
+            </a>
+            <a href="#" id="instagram-link" aria-label="Instagram" title="Instagram">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37Z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            </a>
+        </div>
+    </section>
 
     <script>
-        // Aapka naya aur sahi Render backend link yahan set kar diya hai
-        const BACKEND_URL = "https://oh-2ni4.onrender.com/api/chat";
+        // --- FIREBASE SETUP ---
+        // Replace with YOUR Firebase project config (Firebase Console → Project Settings → Your apps → SDK setup)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDuBc6FPnsCpyaqrYkOY6OT-ZjWC-A0xl4",
+            authDomain: "ptotfolio-y.firebaseapp.com",
+            projectId: "ptotfolio-y",
+            storageBucket: "ptotfolio-y.firebasestorage.app",
+            messagingSenderId: "279786639458",
+            appId: "1:279786639458:web:5fd6757bd25e3d7e8ac13b"
+        };
 
-        function handleKeyPress(e) {
-            if (e.key === 'Enter') askAI();
+        let db = null;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+        } catch (e) {
+            console.warn('Firebase not configured yet — using local fallback.', e);
         }
 
-        async function askAI() {
-            const inputEl = document.getElementById('userInput');
-            const chatContainer = document.getElementById('chatContainer');
-            const sendBtn = document.getElementById('sendBtn');
-            const prompt = inputEl.value.trim();
-
-            if (!prompt) return;
-
-            appendMessage(prompt, 'user');
-            inputEl.value = '';
-            
-            sendBtn.disabled = true;
-            const loadingDiv = appendMessage('Thinking...', 'ai');
-
+        // --- LOAD PROFILE CONTENT FROM FIRESTORE (edited via admin panel) ---
+        async function loadProfileContent() {
+            if (!db) return;
             try {
-                const response = await fetch(BACKEND_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ prompt: prompt })
-                });
+                const doc = await db.collection('profile').doc('main').get();
+                if (!doc.exists) return;
+                const data = doc.data();
 
-                const data = await response.json();
-                console.log("Response data:", data);
+                const nameEl = document.querySelector('.mini-name');
+                const roleEl = document.querySelector('.mini-role');
+                const aboutEl = document.querySelector('.mini-about');
+                const buildingEl = document.querySelector('.now-building');
 
-                // Check standard OpenAI format returned by Python backend
-                if (data.choices && data.choices[0] && data.choices[0].message) {
-                    loadingDiv.innerText = data.choices[0].message.content;
-                } else if (data.detail) {
-                    // Agar Python backend se koi Validation/HTTP Error aaye
-                    loadingDiv.innerText = "Python Error: " + (typeof data.detail === 'object' ? JSON.stringify(data.detail) : data.detail);
-                } else if (data.error) {
-                    loadingDiv.innerText = "API Error: " + JSON.stringify(data.error);
-                } else {
-                    loadingDiv.innerText = "Mismatched format: " + JSON.stringify(data);
+                if (data.name && nameEl) nameEl.textContent = data.name;
+                if (data.avatarUrl) {
+                    const avatarEl = document.getElementById('profile-avatar');
+                    if (avatarEl) {
+                        avatarEl.src = data.avatarUrl;
+                        avatarEl.style.display = 'block';
+                    }
+                }
+                if (data.about && aboutEl) aboutEl.textContent = data.about;
+                if (data.role && roleEl) {
+                    const firstNode = roleEl.childNodes[0];
+                    if (firstNode) firstNode.textContent = data.role + ' ';
+                }
+                if (data.nowBuilding && buildingEl) {
+                    const textNodes = Array.from(buildingEl.childNodes).filter(n => n.nodeType === 3 && n.textContent.trim().length > 0);
+                    const targetNode = textNodes[textNodes.length - 1];
+                    if (targetNode) targetNode.textContent = ' ' + data.nowBuilding;
                 }
 
-            } catch (error) {
-                console.error("Frontend Error:", error);
-                loadingDiv.innerText = "Error: Server se response nahi mila.";
-            } finally {
-                sendBtn.disabled = false;
-                chatContainer.scrollTop = chatContainer.scrollHeight;
+                // Social links
+                if (data.links) {
+                    const emailLinkEl = document.getElementById('email-link');
+                    const githubLinkEl = document.getElementById('github-link');
+                    const twitterLinkEl = document.getElementById('twitter-link');
+                    const instagramLinkEl = document.getElementById('instagram-link');
+                    if (data.links.email && emailLinkEl) {
+                        emailLinkEl.href = `mailto:${data.links.email}`;
+                        emailLinkEl.dataset.email = data.links.email;
+                    }
+                    if (data.links.github && githubLinkEl) githubLinkEl.href = data.links.github;
+                    if (data.links.twitter && twitterLinkEl) twitterLinkEl.href = data.links.twitter;
+                    if (data.links.instagram && instagramLinkEl) instagramLinkEl.href = data.links.instagram;
+                }
+
+                // Skill tags
+                if (Array.isArray(data.skills) && data.skills.length) {
+                    const skillsWrap = document.querySelector('.mini-skills');
+                    if (skillsWrap) {
+                        skillsWrap.innerHTML = data.skills.map(s => `<span class="skill-tag">${escapeHtml(s)}</span>`).join('');
+                    }
+                }
+
+                // Stats
+                if (data.stats) {
+                    const statEls = document.querySelectorAll('.stat-number');
+                    const values = [data.stats.projects, data.stats.years, data.stats.passion];
+                    statEls.forEach((el, i) => {
+                        if (values[i] !== undefined && values[i] !== null) {
+                            el.setAttribute('data-count', values[i]);
+                        }
+                    });
+                }
+
+                // Projects
+                if (Array.isArray(data.projects) && data.projects.length) {
+                    const cards = document.querySelectorAll('.project-card');
+                    const modalKeys = ['anicompanion', 'animeexplorer', 'jarvis'];
+                    data.projects.forEach((p, i) => {
+                        if (!cards[i]) return;
+                        const titleEl = cards[i].querySelector('.project-title');
+                        const descEl = cards[i].querySelector('.project-desc');
+                        const tagEl = cards[i].querySelector('.project-tag');
+                        if (p.title && titleEl) titleEl.textContent = p.title;
+                        if (p.desc && descEl) descEl.textContent = p.desc;
+                        if (p.tag && tagEl) tagEl.textContent = p.tag;
+                        if (p.image && typeof projectData !== 'undefined' && projectData[modalKeys[i]]) {
+                            projectData[modalKeys[i]].image = p.image;
+                        }
+                    });
+                }
+
+                // Devlog (safe to fully rebuild — no dependent interactive JS)
+                if (Array.isArray(data.devlog) && data.devlog.length) {
+                    const devlogWrap = document.querySelector('.devlog');
+                    if (devlogWrap) {
+                        devlogWrap.innerHTML = data.devlog.map(entry => `
+                            <div class="devlog-entry">
+                                <span class="devlog-date">${escapeHtml(entry.date || '')}</span>
+                                <span class="devlog-text">${escapeHtml(entry.text || '')}</span>
+                            </div>
+                        `).join('');
+                    }
+                }
+
+                // Testimonials (update existing slots in place so the carousel JS/dots keep working)
+                if (Array.isArray(data.testimonials) && data.testimonials.length) {
+                    const testimonialEls = document.querySelectorAll('.testimonial');
+                    data.testimonials.slice(0, testimonialEls.length).forEach((t, i) => {
+                        const quoteEl = testimonialEls[i].querySelector('.testimonial-quote');
+                        const authorEl = testimonialEls[i].querySelector('.testimonial-author');
+                        if (quoteEl && t.quote) quoteEl.textContent = `"${t.quote}"`;
+                        if (authorEl && t.author) authorEl.textContent = t.author;
+                    });
+                }
+            } catch (e) {
+                console.warn('Could not load profile content from Firestore.', e);
             }
         }
 
-        function appendMessage(text, sender) {
-            const chatContainer = document.getElementById('chatContainer');
-            const msgDiv = document.createElement('div');
-            msgDiv.classList.add('message', sender);
-            msgDiv.innerText = text;
-            chatContainer.appendChild(msgDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-            return msgDiv;
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        loadProfileContent();
+
+        const charLayer = document.getElementById('character-layer');
+        const charImg = document.getElementById('character-img');
+        const audio = document.getElementById('audio-element');
+        const playBtn = document.getElementById('play-trigger');
+        const playerCard = document.getElementById('player-card');
+        const progressContainer = document.getElementById('progress-cont');
+        const progressBar = document.getElementById('progress-actual');
+        const timeDisplay = document.getElementById('time-track');
+        const volumeSlider = document.getElementById('vol-slider');
+        const sakuraSlider = document.getElementById('sakura-slider');
+        const trackNameEl = document.getElementById('track-name');
+        const prevTrackBtn = document.getElementById('prev-track');
+        const nextTrackBtn = document.getElementById('next-track');
+
+        // --- PLAYLIST ---
+        const playlist = [
+            { title: 'Fall To Hell - DOLLWAVE', src: 'https://www.dropbox.com/scl/fi/ersb17v6uwmcelmvapgxp/Fall-To-Hell-DOLLWAVE-Darkwave-Lyrics-visualizer.mp3?rlkey=3pfivpdswvsnwxwzqnix01wnl&st=vs1tmdms&dl=1' }
+            // Add more tracks here, e.g.:
+            // { title: 'Track Name - Artist', src: 'https://your-link.mp3?dl=1' }
+        ];
+        let currentTrackIndex = 0;
+
+        function loadTrack(index, autoplay) {
+            if (!playlist[index]) return;
+            currentTrackIndex = (index + playlist.length) % playlist.length;
+            const track = playlist[currentTrackIndex];
+            audio.src = track.src;
+            if (trackNameEl) trackNameEl.textContent = track.title;
+            if (autoplay) {
+                audio.play().then(() => {
+                    playBtn.textContent = 'Pause';
+                    playerCard.classList.add('is-playing');
+                }).catch(() => {});
+            }
+        }
+
+        if (prevTrackBtn) {
+            prevTrackBtn.addEventListener('click', () => loadTrack(currentTrackIndex - 1, !audio.paused));
+        }
+        if (nextTrackBtn) {
+            nextTrackBtn.addEventListener('click', () => loadTrack(currentTrackIndex + 1, !audio.paused));
+        }
+
+        if (!charImg.getAttribute('src')) {
+            charImg.style.display = 'none';
+        } else {
+            charImg.addEventListener('error', () => { charImg.style.display = 'none'; });
+        }
+
+        let mouseX = 0, mouseY = 0;
+        let charX = 0, charY = 0;
+        let petalsParamX = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2);
+            mouseY = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
+        });
+
+        function updateParallax() {
+            const targetX = mouseX * 18;
+            const targetY = mouseY * 12;
+            
+            charX += (targetX - charX) * 0.08; 
+            charY += (targetY - charY) * 0.08;
+            
+            petalsParamX += (-mouseX * 10 - petalsParamX) * 0.05;
+
+            charLayer.style.transform = `translate(${charX}px, ${charY}px)`;
+            
+            requestAnimationFrame(updateParallax);
+        }
+        updateParallax();
+
+        const petalCanvas = document.getElementById('petals-canvas');
+        const ctx = petalCanvas.getContext('2d');
+
+        function resizeCanvas() {
+            petalCanvas.width = window.innerWidth;
+            petalCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const petalsArray = [];
+        // Sakura strength: starting petal count, controlled live via slider
+        let maxPetals = 40;
+
+        class Petal {
+            constructor() {
+                this.x = Math.random() * petalCanvas.width;
+                this.y = Math.random() * -petalCanvas.height;
+                this.size = Math.random() * 5 + 3;
+                this.speedY = Math.random() * 0.7 + 0.3;
+                this.speedX = Math.random() * 0.4 - 0.2;
+                this.angle = Math.random() * 360;
+                this.spin = Math.random() * 0.8 - 0.4;
+                
+                const colors = [
+                    'rgba(239, 68, 68, 0.25)',
+                    'rgba(249, 115, 22, 0.20)',
+                    'rgba(254, 205, 211, 0.25)'
+                ];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX + Math.sin(this.y / 40) * 0.25 + (petalsParamX * 0.02);
+                this.angle += this.spin;
+
+                if (this.y > petalCanvas.height + 10) {
+                    this.y = -10;
+                    this.x = Math.random() * petalCanvas.width;
+                }
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate((this.angle * Math.PI) / 180);
+                ctx.fillStyle = this.color;
+                
+                ctx.beginPath();
+                ctx.ellipse(0, 0, this.size, this.size / 1.8, 0, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        for (let i = 0; i < maxPetals; i++) {
+            petalsArray.push(new Petal());
+        }
+
+        // Sakura intensity slider: add/remove petals live
+        sakuraSlider.addEventListener('input', (e) => {
+            const target = parseInt(e.target.value, 10);
+            if (target > petalsArray.length) {
+                while (petalsArray.length < target) {
+                    petalsArray.push(new Petal());
+                }
+            } else {
+                petalsArray.length = target;
+            }
+            maxPetals = target;
+        });
+
+        function animatePetals() {
+            ctx.clearRect(0, 0, petalCanvas.width, petalCanvas.height);
+            for (let i = 0; i < petalsArray.length; i++) {
+                petalsArray[i].update();
+                petalsArray[i].draw();
+            }
+            requestAnimationFrame(animatePetals);
+        }
+        animatePetals();
+
+        audio.volume = volumeSlider.value;
+
+        playBtn.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+                playBtn.textContent = 'Pause';
+                playerCard.classList.add('is-playing');
+            } else {
+                audio.pause();
+                playBtn.textContent = 'Play';
+                playerCard.classList.remove('is-playing');
+            }
+        });
+
+        function formatTime(secs) {
+            if (isNaN(secs)) return "0:00";
+            const minutes = Math.floor(secs / 60);
+            const seconds = Math.floor(secs % 60);
+            return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+
+        audio.addEventListener('timeupdate', () => {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = `${percent}%`;
+            timeDisplay.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+        });
+
+        audio.addEventListener('loadedmetadata', () => {
+            timeDisplay.textContent = `0:00 / ${formatTime(audio.duration)}`;
+        });
+
+        progressContainer.addEventListener('click', (e) => {
+            const rect = progressContainer.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const width = rect.width;
+            audio.currentTime = (clickX / width) * audio.duration;
+        });
+
+        volumeSlider.addEventListener('input', (e) => {
+            audio.volume = e.target.value;
+        });
+
+        audio.addEventListener('ended', () => {
+            if (playlist.length > 1) {
+                loadTrack(currentTrackIndex + 1, true);
+            } else {
+                playBtn.textContent = 'Play';
+                progressBar.style.width = '0%';
+                playerCard.classList.remove('is-playing');
+            }
+        });
+
+        // --- STATS COUNT-UP ANIMATION ---
+        const statNumbers = document.querySelectorAll('.stat-number');
+        const statObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    const target = parseInt(el.getAttribute('data-count'), 10);
+                    const duration = 1200;
+                    const startTime = performance.now();
+                    function tick(now) {
+                        const progress = Math.min((now - startTime) / duration, 1);
+                        const eased = 1 - Math.pow(1 - progress, 3);
+                        el.textContent = Math.round(eased * target);
+                        if (progress < 1) requestAnimationFrame(tick);
+                    }
+                    requestAnimationFrame(tick);
+                    statObserver.unobserve(el);
+                }
+            });
+        }, { threshold: 0.3 });
+        statNumbers.forEach(el => statObserver.observe(el));
+
+        // --- SKILL BAR FILL ANIMATION ---
+        const skillFills = document.querySelectorAll('.skill-bar-fill');
+        const skillObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    const width = el.getAttribute('data-width');
+                    setTimeout(() => { el.style.width = width + '%'; }, 100);
+                    skillObserver.unobserve(el);
+                }
+            });
+        }, { threshold: 0.3 });
+        skillFills.forEach(el => skillObserver.observe(el));
+
+        // --- TESTIMONIAL CAROUSEL ---
+        const testimonials = document.querySelectorAll('.testimonial');
+        const testimonialDots = document.querySelectorAll('.testimonial-dot');
+        let currentTestimonial = 0;
+
+        function showTestimonial(index) {
+            testimonials.forEach((t, i) => t.classList.toggle('active', i === index));
+            testimonialDots.forEach((d, i) => d.classList.toggle('active', i === index));
+            currentTestimonial = index;
+        }
+
+        testimonialDots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                showTestimonial(parseInt(dot.getAttribute('data-index'), 10));
+            });
+        });
+
+        if (testimonials.length > 0) {
+            setInterval(() => {
+                showTestimonial((currentTestimonial + 1) % testimonials.length);
+            }, 4500);
+        }
+
+        // --- THEME TOGGLE ---
+        const themeBtn = document.getElementById('theme-btn');
+        if (themeBtn) {
+            themeBtn.addEventListener('click', () => {
+                document.body.classList.toggle('light-theme');
+            });
+        }
+
+        // --- SHARE BUTTON ---
+        const shareBtn = document.getElementById('share-btn');
+        if (shareBtn) {
+            shareBtn.addEventListener('click', async () => {
+                const shareData = {
+                    title: document.title,
+                    text: 'Check out this portfolio!',
+                    url: window.location.href
+                };
+                if (navigator.share) {
+                    try { await navigator.share(shareData); } catch (e) {}
+                } else if (navigator.clipboard) {
+                    navigator.clipboard.writeText(window.location.href).catch(() => {});
+                    shareBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Link Copied';
+                    setTimeout(() => { shareBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Share'; }, 1500);
+                }
+            });
+        }
+
+        // --- RESUME BUTTON ---
+        const resumeBtn = document.getElementById('resume-btn');
+        if (resumeBtn) {
+            resumeBtn.addEventListener('click', () => {
+                resumeBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Add resume link';
+                setTimeout(() => { resumeBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Resume'; }, 1800);
+            });
+        }
+
+        // --- CONTACT FORM (Firestore + mailto fallback) ---
+        const contactForm = document.getElementById('contact-form');
+        if (contactForm) {
+            contactForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                // Honeypot spam check — bots tend to fill every field, humans never see/fill this one
+                const hpField = document.getElementById('hp-field');
+                if (hpField && hpField.value.trim() !== '') {
+                    return; // silently drop likely-bot submission
+                }
+
+                const inputs = contactForm.querySelectorAll('input, textarea');
+                const name = inputs[0].value;
+                const email = inputs[1].value;
+                const message = inputs[2].value;
+                const submitBtn = contactForm.querySelector('.contact-submit');
+                const originalLabel = submitBtn.textContent;
+
+                if (db) {
+                    try {
+                        submitBtn.textContent = 'Sending...';
+                        await db.collection('messages').add({
+                            name, email, message,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        submitBtn.textContent = 'Sent ✓';
+                        contactForm.reset();
+                        sakuraBurst(60);
+                        setTimeout(() => { submitBtn.textContent = originalLabel; }, 2000);
+                        return;
+                    } catch (err) {
+                        console.warn('Firestore save failed, falling back to mailto.', err);
+                    }
+                }
+
+                // Fallback: open mail client if Firebase isn't configured or the write failed
+                const subject = encodeURIComponent(`Portfolio contact from ${name}`);
+                const body = encodeURIComponent(`${message}\n\nFrom: ${name} (${email})`);
+                window.location.href = `mailto:you@example.com?subject=${subject}&body=${body}`;
+                sakuraBurst(60);
+            });
+        }
+
+        // --- CURSOR SAKURA TRAIL (desktop / pointer devices only) ---
+        if (window.matchMedia('(pointer: fine)').matches) {
+            let lastTrailTime = 0;
+            document.addEventListener('mousemove', (e) => {
+                const now = Date.now();
+                if (now - lastTrailTime < 60) return;
+                lastTrailTime = now;
+                const trailPetal = new Petal();
+                trailPetal.x = e.clientX;
+                trailPetal.y = e.clientY;
+                trailPetal.speedY = 0.6;
+                trailPetal.size = Math.random() * 3 + 2;
+                petalsArray.push(trailPetal);
+                if (petalsArray.length > maxPetals + 30) {
+                    petalsArray.shift();
+                }
+            });
+        }
+
+        // --- LOADING SCREEN ---
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loading-screen').classList.add('hidden');
+            }, 600);
+        });
+
+        // --- SCROLL PROGRESS BAR ---
+        const scrollProgress = document.getElementById('scroll-progress');
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            if (scrollProgress) scrollProgress.style.width = pct + '%';
+
+            // Parallax for nihility background text
+            const nihilityText = document.querySelector('.nihility-bg-text');
+            if (nihilityText) {
+                nihilityText.style.transform = `translateY(${-50 + scrollTop * 0.03}%)`;
+            }
+        });
+
+        // --- TYPING ANIMATION ---
+        const typingTarget = document.getElementById('typing-target');
+        const typingWords = ['Anime Enthusiast', 'Sakura Chaser', 'Night Owl Coder'];
+        let typingWordIndex = 0, typingCharIndex = 0, typingDeleting = false;
+
+        function typeLoop() {
+            if (!typingTarget) return;
+            const word = typingWords[typingWordIndex];
+            if (!typingDeleting) {
+                typingCharIndex++;
+                typingTarget.textContent = word.slice(0, typingCharIndex);
+                if (typingCharIndex === word.length) {
+                    typingDeleting = true;
+                    setTimeout(typeLoop, 1400);
+                    return;
+                }
+            } else {
+                typingCharIndex--;
+                typingTarget.textContent = word.slice(0, typingCharIndex);
+                if (typingCharIndex === 0) {
+                    typingDeleting = false;
+                    typingWordIndex = (typingWordIndex + 1) % typingWords.length;
+                }
+            }
+            setTimeout(typeLoop, typingDeleting ? 40 : 80);
+        }
+        setTimeout(typeLoop, 800);
+
+        // --- SKILL RADAR CHART ---
+        const radarCanvas = document.getElementById('radar-chart');
+        if (radarCanvas) {
+            const rctx = radarCanvas.getContext('2d');
+            const radarSkills = [
+                { label: 'Flutter', value: 0.9 },
+                { label: 'Python', value: 0.85 },
+                { label: 'Firebase', value: 0.8 },
+                { label: 'UI/Anim', value: 0.88 },
+                { label: 'APIs', value: 0.82 }
+            ];
+            const cx = 110, cy = 110, radius = 80;
+            const sides = radarSkills.length;
+
+            function drawRadar() {
+                rctx.clearRect(0, 0, 220, 220);
+                // grid rings
+                for (let ring = 1; ring <= 4; ring++) {
+                    rctx.beginPath();
+                    for (let i = 0; i <= sides; i++) {
+                        const angle = (Math.PI * 2 * i) / sides - Math.PI / 2;
+                        const r = (radius * ring) / 4;
+                        const x = cx + r * Math.cos(angle);
+                        const y = cy + r * Math.sin(angle);
+                        if (i === 0) rctx.moveTo(x, y); else rctx.lineTo(x, y);
+                    }
+                    rctx.strokeStyle = 'rgba(255,255,255,0.08)';
+                    rctx.stroke();
+                }
+                // data polygon
+                rctx.beginPath();
+                radarSkills.forEach((s, i) => {
+                    const angle = (Math.PI * 2 * i) / sides - Math.PI / 2;
+                    const r = radius * s.value;
+                    const x = cx + r * Math.cos(angle);
+                    const y = cy + r * Math.sin(angle);
+                    if (i === 0) rctx.moveTo(x, y); else rctx.lineTo(x, y);
+                });
+                rctx.closePath();
+                rctx.fillStyle = 'rgba(181, 137, 61, 0.25)';
+                rctx.strokeStyle = '#b5893d';
+                rctx.lineWidth = 1.5;
+                rctx.fill();
+                rctx.stroke();
+                // labels
+                rctx.font = '9px monospace';
+                rctx.fillStyle = 'rgba(255,255,255,0.5)';
+                radarSkills.forEach((s, i) => {
+                    const angle = (Math.PI * 2 * i) / sides - Math.PI / 2;
+                    const x = cx + (radius + 18) * Math.cos(angle);
+                    const y = cy + (radius + 18) * Math.sin(angle);
+                    rctx.textAlign = 'center';
+                    rctx.fillText(s.label, x, y);
+                });
+            }
+
+            const radarObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        drawRadar();
+                        radarObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.3 });
+            radarObserver.observe(radarCanvas);
+        }
+
+        // --- PROJECT MODAL ---
+        const projectData = {
+            anicompanion: {
+                title: 'AniCompanion',
+                desc: 'An anime companion Android app built with Flutter, powered by the Gemini API. Features a persistent character named Alya with chat memory. Currently through Phase 2 of 7.',
+                tags: ['Flutter', 'Gemini API', 'Android'],
+                image: ''
+            },
+            animeexplorer: {
+                title: 'AnimeExplorer',
+                desc: 'A hobby gacha card vault web app using the Jikan API for anime data and Firebase Firestore for storage. Recently added 5-card pack reveals with animated epic card borders.',
+                tags: ['Firebase', 'Jikan API', 'Web'],
+                image: ''
+            },
+            jarvis: {
+                title: 'Jarvis Assistant',
+                desc: 'A Jarvis-like Python AI assistant planned for Termux on Android, using Groq and Cohere APIs for fast, capable responses on-device.',
+                tags: ['Python', 'Groq', 'Termux'],
+                image: ''
+            }
+        };
+
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalImage = document.getElementById('modal-image');
+        const modalTitle = document.getElementById('modal-title');
+        const modalDesc = document.getElementById('modal-desc');
+        const modalTags = document.getElementById('modal-tags');
+        const modalClose = document.getElementById('modal-close');
+
+        document.querySelectorAll('.project-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const key = card.getAttribute('data-modal');
+                const data = projectData[key];
+                if (!data || !modalOverlay) return;
+                modalTitle.textContent = data.title;
+                modalDesc.textContent = data.desc;
+                modalTags.innerHTML = data.tags.map(t => `<span class="skill-tag">${t}</span>`).join('');
+                if (modalImage) {
+                    if (data.image) {
+                        modalImage.src = data.image;
+                        modalImage.alt = data.title;
+                        modalImage.style.display = 'block';
+                    } else {
+                        modalImage.style.display = 'none';
+                    }
+                }
+                modalOverlay.classList.add('show');
+            });
+        });
+
+        if (modalClose) {
+            modalClose.addEventListener('click', () => modalOverlay.classList.remove('show'));
+        }
+        if (modalOverlay) {
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) modalOverlay.classList.remove('show');
+            });
+        }
+
+        // --- QR CODE ---
+        const qrImg = document.getElementById('qr-code');
+        if (qrImg) {
+            const qrData = encodeURIComponent(window.location.href);
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${qrData}`;
+        }
+
+        // --- VISITOR COUNTER (Firestore global count, localStorage fallback) ---
+        const visitorEl = document.getElementById('visitor-counter');
+        const eyeIconSvg = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>';
+
+        async function updateVisitorCounter() {
+            if (!visitorEl) return;
+
+            if (db) {
+                try {
+                    const statsRef = db.collection('stats').doc('visitors');
+                    const newCount = await db.runTransaction(async (t) => {
+                        const doc = await t.get(statsRef);
+                        const current = doc.exists ? (doc.data().count || 0) : 0;
+                        const updated = current + 1;
+                        t.set(statsRef, { count: updated }, { merge: true });
+                        return updated;
+                    });
+                    visitorEl.innerHTML = `${eyeIconSvg} ${newCount} people have viewed this`;
+                    return;
+                } catch (err) {
+                    console.warn('Firestore visitor count failed, using local fallback.', err);
+                }
+            }
+
+            // Fallback: local-only simulated count (per-browser, not shared)
+            const today = new Date().toDateString();
+            const stored = JSON.parse(localStorage.getItem('yuffie_visits') || '{}');
+            if (stored.date !== today) {
+                stored.date = today;
+                stored.count = Math.floor(Math.random() * 40) + 20;
+            }
+            stored.count += 1;
+            localStorage.setItem('yuffie_visits', JSON.stringify(stored));
+            visitorEl.innerHTML = `${eyeIconSvg} ${stored.count} people viewed this today`;
+        }
+        updateVisitorCounter();
+
+        // --- LANGUAGE TOGGLE ---
+        const langBtn = document.getElementById('lang-btn');
+        let isJapanese = false;
+        if (langBtn) {
+            langBtn.addEventListener('click', () => {
+                isJapanese = !isJapanese;
+                document.querySelectorAll('[data-en]').forEach(el => {
+                    el.textContent = isJapanese ? el.getAttribute('data-jp') : el.getAttribute('data-en');
+                });
+            });
+        }
+
+        // --- KONAMI CODE EASTER EGG ---
+        const konamiSequence = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+        let konamiProgress = 0;
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+            if (key === konamiSequence[konamiProgress]) {
+                konamiProgress++;
+                if (konamiProgress === konamiSequence.length) {
+                    konamiProgress = 0;
+                    sakuraBurst(150);
+                    document.body.style.animation = 'pulse-glow 0.3s ease 3';
+                }
+            } else {
+                konamiProgress = 0;
+            }
+        });
+
+        function sakuraBurst(count) {
+            for (let i = 0; i < count; i++) {
+                const p = new Petal();
+                p.x = petalCanvas.width / 2 + (Math.random() - 0.5) * 100;
+                p.y = petalCanvas.height / 2;
+                p.speedX = (Math.random() - 0.5) * 6;
+                p.speedY = (Math.random() - 0.5) * 6;
+                petalsArray.push(p);
+            }
+            setTimeout(() => {
+                petalsArray.splice(maxPetals);
+            }, 3000);
+        }
+
+        // --- SYNTHESIZED CLICK SOUND EFFECTS ---
+        let audioCtx = null;
+        function playClickSound() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(700, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } catch (e) {}
+        }
+        // Event delegation so this keeps working even for elements added/replaced later (e.g. skill tags from Firestore)
+        const CLICK_SOUND_SELECTOR = '.action-btn, .play-btn, .nav-btn, .skill-tag, .testimonial-dot, .badge-item, .project-card, .contact-submit, .modal-close';
+        document.addEventListener('click', (e) => {
+            if (e.target.closest(CLICK_SOUND_SELECTOR)) {
+                playClickSound();
+            }
+        });
+
+        // --- CONFETTI/SAKURA BURST ON CONTACT FORM SUBMIT ---
+        // (hooked into existing contact form submit handler below)
+        const revealEls = document.querySelectorAll('.reveal');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry, i) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, i * 100);
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+        revealEls.forEach(el => revealObserver.observe(el));
+
+        // --- COPY EMAIL TO CLIPBOARD ---
+        const emailLink = document.getElementById('email-link');
+        const copyToast = document.getElementById('copy-toast');
+        if (emailLink && copyToast) {
+            emailLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                const email = emailLink.dataset.email || 'you@example.com';
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(email).catch(() => {});
+                }
+                copyToast.classList.add('show');
+                setTimeout(() => copyToast.classList.remove('show'), 1400);
+            });
         }
     </script>
 </body>
 </html>
-
