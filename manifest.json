@@ -1,0 +1,22 @@
+{
+  "name": "Yuffie Kinetic Interface — Portfolio",
+  "short_name": "Yuffie",
+  "description": "Full-stack developer portfolio with an anime-inspired kinetic interface.",
+  "start_url": "./yuffie-kinetic-interface.html",
+  "display": "standalone",
+  "background_color": "#060608",
+  "theme_color": "#060608",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://u.cubeupload.com/zmonochrome/tumblr8b1866a9355004.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "https://u.cubeupload.com/zmonochrome/tumblr8b1866a9355004.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
